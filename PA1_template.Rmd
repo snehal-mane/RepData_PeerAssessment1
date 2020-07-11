@@ -27,11 +27,11 @@ This simply is to understand the dataset and to:
 ## What is mean total number of steps taken per day?
 1. Calculate the total number of steps taken per day
 ```{r}
-steps_day <- aggregate(steps ~ date, activity, sum, na.rm=TRUE)
+steps_date <- aggregate(steps ~ date, activity, sum, na.rm=TRUE)
 ```
 2. Make a histogram of the total number of steps taken each day
 ``` {r}
-hist(steps_day$steps,
+hist(steps_date$steps,
      main = "Histogram of the total number of steps taken each day",
      xlab = "Steps",
      col = "cadetblue"
@@ -42,8 +42,8 @@ This figure shows the histogram of total number of steps taken per day.
 
 3. Calculate and report the mean and median of the total number of steps taken per day
 ```{r}
-mean(steps_day$steps)
-median(steps_day$steps)
+mean(steps_date$steps)
+median(steps_date$steps)
 ```
 Mean and median of the steps.  
 
@@ -98,8 +98,8 @@ for(i in 1:nrow(activity2)){
 
 4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 ```{r}
-steps_day2 <- aggregate(steps~date, activity2, sum)
-hist(steps_day$steps,
+steps_date2 <- aggregate(steps~date, activity2, sum)
+hist(steps_date$steps,
      main = "Total number of steps taken each day with missing values removed",
      xlab = "Steps",
      col = "cadetblue",
@@ -110,9 +110,52 @@ hist(steps_day$steps,
 Histogram of the total number of steps taken each day with the missing step values removed and replaced with mean steps according to the interval.
 
 ```{r}
-mean(steps_day2$steps)
-median(steps_day2$steps)
+mean(steps_date2$steps)
+median(steps_date2$steps)
 ```
 
 The median differs from the median calculated in the first part of the assignment. The mean does not.
 
+## Are there differences in activity patterns between weekdays and weekends?
+
+1. Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
+
+```{r}
+activity2$date <- as.Date(strptime(activity2$date,"%Y-%m-%d"))
+activity2$day <- weekdays(activity2$date)
+x = c("Saturday","Sunday")
+for(i in 1:nrow(activity2)){
+        if(activity2[i,]$day %in% x){
+                activity2[i,]$day <- "weekend"
+        }
+        else {
+                activity2[i,]$day <- "weekday"
+        }
+}
+
+unique(activity2$day)
+```
+
+A new column is added which indicates whether the day is a weekend or a weekday.
+
+```{r}
+steps_day <- aggregate(activity2$steps ~ activity2$interval + activity2$day, activity2, mean)
+names(steps_day) <- c("interval","day","steps")
+```
+
+Dataset formed by taking 5-minute interval and the average number of steps taken, averaged across all weekday days or weekend days.
+
+```{r}
+library(lattice)
+xyplot(steps~interval|day,
+       steps_day,
+       type="l",
+       layout = c(1,2),
+       main = "Interval and number of steps averaged across days",
+       xlab = "Interval",
+       ylab = "Average No. of Steps",
+       col = "cadetblue"
+       )
+```
+
+Time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis)
