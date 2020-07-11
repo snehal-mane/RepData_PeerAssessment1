@@ -1,25 +1,118 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+author: "SM"
+date: "11/07/2020"
+output: html_document
 ---
 
-
 ## Loading and preprocessing the data
-
+1. Load the data (i.e. read.csv())
+```{r echo=TRUE}
+activity<-read.csv("activity.csv")
+```
+2. Process/transform the data (if necessary) into a format suitable for your analysis
+```{r}
+dim(activity)
+names(activity)
+head(activity)
+sum(is.na(activity))
+```
+This simply is to understand the dataset and to:  
+1. Find the dimensions of the dataset.  
+2. Find the column names.  
+3. Look at the first few rows of data.  
+4. Find number of missing data.  
 
 
 ## What is mean total number of steps taken per day?
+1. Calculate the total number of steps taken per day
+```{r}
+steps_day <- aggregate(steps ~ date, activity, sum, na.rm=TRUE)
+```
+2. Make a histogram of the total number of steps taken each day
+``` {r}
+hist(steps_day$steps,
+     main = "Histogram of the total number of steps taken each day",
+     xlab = "Steps",
+     col = "cadetblue"
+     )
+```
+  
+This figure shows the histogram of total number of steps taken per day.  
 
-
+3. Calculate and report the mean and median of the total number of steps taken per day
+```{r}
+mean(steps_day$steps)
+median(steps_day$steps)
+```
+Mean and median of the steps.  
 
 ## What is the average daily activity pattern?
 
+1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+```{r}
+stepsinterval <- aggregate(steps~interval, activity, mean, na.rm=TRUE)
+with(stepsinterval,plot(x=interval,
+                        y=steps,
+                        type="l",
+                        main = "Average Daily Activity Pattern",
+                        xlab = "Interval",
+                        ylab = "Number of steps",
+                        col = "cadetblue",
+                        col.main = "cadetblue"))
+```  
 
+This figure is the time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)  
+
+2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+```{r}
+stepsinterval[which.max(stepsinterval$steps),]
+```
+
+This gives us the 5-minute interval, on average across all the days in the dataset, containing the maximum number of steps.
 
 ## Imputing missing values
 
+1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+```{r}
+sum(is.na(activity))
+```
 
+Total number of missing values in the dataset (i.e. the total number of rows with NAs)  
 
-## Are there differences in activity patterns between weekdays and weekends?
+2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.  
+
+To fill in the missing values in the "steps" column, we are going to form a dataset which contains mean of steps depending on the interval. If the value of steps is missing in the data, the value is filled by the mean in accordance to the interval value.  
+
+3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+```{r}
+activity2 <- activity
+for(i in 1:nrow(activity2)){
+        if(is.na(activity2[i,]$steps)){
+                activity2[i,]$steps <- stepsinterval[stepsinterval$interval==activity2[i,]$interval,]$steps
+        }
+}
+```
+
+4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+```{r}
+steps_day2 <- aggregate(steps~date, activity2, sum)
+hist(steps_day$steps,
+     main = "Total number of steps taken each day with missing values removed",
+     xlab = "Steps",
+     col = "cadetblue",
+     col.main = "cadetblue"
+)
+```
+
+Histogram of the total number of steps taken each day with the missing step values removed and replaced with mean steps according to the interval.
+
+```{r}
+mean(steps_day2$steps)
+median(steps_day2$steps)
+```
+
+The median differs from the median calculated in the first part of the assignment. The mean does not.
+
