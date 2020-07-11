@@ -13,6 +13,7 @@ hist(steps_date$steps,
      col = "cadetblue"
      )
 
+
 #What is the average daily activity pattern?
 stepsinterval <- aggregate(steps~interval, activity, mean, na.rm=TRUE)
 with(stepsinterval,plot(x=interval,
@@ -40,6 +41,7 @@ hist(steps_day$steps,
      col.main = "cadetblue"
 )
 
+
 # Are there differences in activity patterns between weekdays and weekends?
 activity2$date <- as.Date(strptime(activity2$date,"%Y-%m-%d"))
 activity2$day <- weekdays(activity2$date)
@@ -65,3 +67,4 @@ xyplot(steps~interval|day,
        ylab = "Average No. of Steps",
        col = "cadetblue"
        )
+ 
